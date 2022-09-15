@@ -22,31 +22,71 @@ module.exports.createuser = async (req,res)=>{    //Since we are sending data fr
 
         const salt = bcrypt.genSaltSync(saltRounds);
         const secPass = bcrypt.hashSync(req.body.password, salt);
-
            user = await User.create({
             name : req.body.name,
             email : req.body.email,
             password : secPass
         })
         console.log(user);
-
         const data = {
             user_id : user._id          //IMPORTANT : Note this data is used to create the authentication token using the jwt.sign() method, but the data to be used should be user._id, since _id is an index in the database, and the retrieval of the data will be very fast using id. Also if you see the gui of monogodb, we can notice that email is also being treated as email, so we try to use the same email as sign up this will not be allowed since email should be unique also because it is used as an index.
         }
-        var authToken = jwt.sign(data, 'shhhhh');     //Synchornous sign method, signing the token with data.
-        return res.status(200).json({authentication_token : authToken});    //IMPORTANT : This authToken is going to be sent to the client, allowing the client to access and have an authorization to access parts of website, and since the data is kept inside the authToken so the front end could use this token to read what payload is being transferred.
-
-
-        // return res.status(200).json({});
+        var authToken = jwt.sign(data, JWT_SECRET);     //Synchornous sign method, signing the token with data.
         //Here we would want to send the authentication token, this is provided by the server, so that it could be verified that the authentication is properly done.
+        return res.status(200).json({authentication_token : authToken});    //IMPORTANT : This authToken is going to be sent to the client, allowing the client to access and have an authorization to access parts of website, and since the data is kept inside the authToken so the front end could use this token to read what payload is being transferred.
+        // return res.status(200).json({});
     }
     catch(e){
         //Ideally this try catch block will not only throw an error or just simply tell the client about the error, but this catch block must log this error in some good format, so that developers know what exactly is the error.
         console.log(e.message)
-        return res.status(400).json({error : "some error occured.", message : e.message});
+        return res.status(400).json({error : "Intenal Server Error.", message : e.message});
+        // If we do not send this res.send method here, then the server will wait for some time for this to be sent and finally it will be request timed out. So we must send it. Or else it might block other method call. Or server might be kept unnecessarily busy.
     }
         // We can now send req.body or we could now send in user. user is an instance of the object created in db, which req.body is the data that is being saved in db. Here .send() method takes only one object, if we put two objects in its arguments, then we will get an error.
-        
-        // res.send({"error":"Please enter a unique value of email.", message : e.message});
-        // If we do not send this res.send method here, then the server will wait for some time for this to be sent and finally it will be request timed out. So we must send it. Or else it might block other method call. Or server might be kept unnecessarily busy.
 }
+
+
+
+module.exports.login = async (req,res)=>{ 
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    let {email, password} = req.body;       //Destructuring and saving the email and password in separate variables.
+
+    try{    
+        let user = await User.findOne({email : req.body.email});     
+        if(!user){
+            return res.status(400).json({error : "Username/Password incorrect."});
+        }
+
+        // PARTIALLY IMPORTANT : This method takes a password from the client side, and also takes the hash stored db, to check if the password is correct or not, all the decipeher of the hash will be handled by bcrypt itself. We do not need to worry about the password check.
+        const passwordCompare = await bcrypt.compare(password, user.password);
+        if(!passwordCompare){
+            return res.status(400).json({error : "Username/Password incorrect."});
+        }
+
+        console.log(user);
+        const data = {
+            user_id : user._id
+        }
+        var authToken = jwt.sign(data, JWT_SECRET);
+        return res.status(200).json({authentication_token : authToken});
+
+    }
+    catch(e){
+        console.log(e.message)
+        return res.status(400).json({error : "Intenal Server Error.", message : e.message});
+    }
+}
+
+
+
+
+
+
+
+
+
+
