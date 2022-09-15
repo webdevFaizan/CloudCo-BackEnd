@@ -1,5 +1,6 @@
 const express = require('express');
 const Notes = require('../Models/Notes');
+const { body, validationResult } = require('express-validator');
 
 
 module.exports.getNotes = async (req, res) =>{
@@ -15,6 +16,11 @@ module.exports.getNotes = async (req, res) =>{
 
 
 module.exports.addNote = async (req, res) =>{
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
 
     if(!req.user){
         return res.status(400).json({error : "please login first"});

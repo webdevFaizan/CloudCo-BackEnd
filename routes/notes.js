@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../Config/auth_middleware');
+const notesMiddleware = require('../Config/notes_middleware');
 const notesController = require('../Controllers/notes_controller');
 
 
@@ -11,7 +12,7 @@ router.get('/fetchnotes',authMiddleware.getuser, notesController.getNotes);
 
 
 // Route 2 : '/api/notes/addnote'    using POST, and we need to be logged in for this -
-router.post('/addnote',authMiddleware.getuser, notesController.addNote);
+router.post('/addnote',authMiddleware.getuser, notesMiddleware.checkNotes, notesController.addNote);
 
 
 module.exports = router;
