@@ -7,7 +7,7 @@ const UserSchema = mongoose.Schema({
     email: {
         type: String,
         required: true,
-        unique: true
+        unique: true        //Since this has been marked as unique, this means in the mongodb automatically this will be treated as an index. So even if you do not have any checks regarding the uniqueness of email, if you try to sign up using same mail, an automatic error is going to be thrown.
     },
     password: {
         type: String,

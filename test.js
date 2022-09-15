@@ -5,6 +5,19 @@
 }
 
 {
+    "name" : "Kratos",
+    "email" : "ghostOfSparta@mail.com",
+    "password" : "password"
+}
+
+{
+    "name" : "Brok",
+    "email" : "bestDwarfOfNidavellier@mail.com",
+    "password" : "password"
+}
+
+
+{
     "name" : "Gorr",
     "email" : "godButcher@mail.com",
     "password" : "password"

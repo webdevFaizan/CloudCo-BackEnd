@@ -1,4 +1,7 @@
 const { body } = require('express-validator');
+var jwt = require('jsonwebtoken');
+
+const JWT_SECRET='iamdev.faizan';
 
 
 //This code might seem very difficult but it is very simple, we have a route, middlewares and a controller function, all written at once, this is why it looks difficult. And for the syntax of express-validator just read the documentation of the same and it will seem very easy to you.
@@ -26,4 +29,17 @@ module.exports.login = function(req,res,next){
     next();
 }
 
-
+module.exports.getuser = async function(req, res, next){
+    const token = req.header('auth-token');
+    // console.log(token);
+    if(!token){
+        return res.status(401).json({error : "Please use a correct authorization token"});
+    }
+    try {
+        const data =jwt.verify(token, JWT_SECRET);
+        req.user = data.user_id;
+        next();
+    } catch (error) {
+        return res.status(401).json({error : "erors"});
+    }
+}

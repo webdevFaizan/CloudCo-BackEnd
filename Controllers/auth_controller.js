@@ -47,6 +47,7 @@ module.exports.createuser = async (req,res)=>{    //Since we are sending data fr
 
 
 
+//IMORTANT : At this point, ending of lecture 50, we are not using passport js, for any authentication of the user identity, we are using simply bcryptjs to check for the password stored in the data base, now when the authentication is complete, we will pass some unique data of the user in the jwt authentication token. And the best part about this jwt token is that, we will get this token only if the user it authenticated, i.e the user name and password is correct. But the main purpose of jwt token is to provide authorization and which part of website is accessible to me and which part is not, this is not being utilised right now. We will do that in future.
 module.exports.login = async (req,res)=>{ 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -72,7 +73,7 @@ module.exports.login = async (req,res)=>{
             user_id : user._id
         }
         var authToken = jwt.sign(data, JWT_SECRET);
-        return res.status(200).json({authentication_token : authToken});
+        return res.status(200).json({auth_token : authToken});
 
     }
     catch(e){
@@ -82,7 +83,17 @@ module.exports.login = async (req,res)=>{
 }
 
 
+module.exports.getuser = async (req, res)=>{
 
+    try {
+        let user_id=req.user;
+        let user = await User.findById(user_id).select("-password");
+        return res.status(200).json(user)
+    } catch (error) {
+        console.log(error);
+        return res.status(400).json({error : "Intenal Server Error.", message : error.message});
+    }
+}
 
 
 

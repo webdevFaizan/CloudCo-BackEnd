@@ -7,6 +7,8 @@ const authMiddleware = require('../Config/auth_middleware');
 router.post('/createuser', authMiddleware.createuser ,authContorller.createuser);
 
 //Authenticate a User using POST : '/api/auth/login'    No login required, any endpoint that is going to show some personal data is going to require a login.
-router.post('/login', authMiddleware.login ,authContorller.login);
+router.post('/login', authMiddleware.login ,authContorller.login);  //This has to be in post request, since the details being transferred from the client side must be kept secret.
+
+router.post('/getuser', authMiddleware.getuser ,authContorller.getuser);
 
 module.exports = router;
