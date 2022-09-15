@@ -42,6 +42,39 @@ module.exports.addNote = async (req, res) =>{
         console.log(error.message);
         return res.status(500).json("Internal server error occured while creating notes and sending to db");
     }
+}
 
+
+module.exports.updateNote = async function (req,res){
+    try{
+        let  {title, description, tag} =req.body;
+        let note = await Notes.findOne({id : req.params.id});       //This params.id we will get from the routes, since it was present in routes as /:id. Now only req.query is left, we have not implemented it yet. But request.params and request.params are completely different things.
+        if(!note){
+            return res.status(404).send("notes not found")
+        }
+        console.log("Old note is : "+ note);
+        let newNote ={} ;
+        if(title){ newNote.title = title}       //Only update those elements that are being updated.
+        if(description){ newNote.description = description}
+        if(tag){ newNote.tag = tag}
+        console.log("Note to be updated is : ");
+        console.log(newNote);   //I had to separate these two console.log line, since in one single line this was giving us [object, object] tag, this is because it is kind of being converted to string but we want to keep it like a json object.
+
+        if(note.user.toString()!==req.user){        //DOUBT : If the user has been populated, then what will this function note.user.toString() return? Ideally it should return the string id of the user. Or else we could still access the id of the user. notes.user.id just think that the user has been populated then .id will be available inside the object.
+            console.log("You are trying to update a note you are not authorized to update.");
+            return res.status(401).send("Not authorized to update");
+        }
+
+        // IMPORTANT : Why did we not choose to find the note and update above, why calling findOne first time, and then findbyidandupdate the second time. This is to ensure our api is secure to all threats physical or magical. In the findOne we just checked if the notes existed on db or not? if yes then do not update it as soon as possible, update it only when you are having some more checks, What if the first user is logged in then the middleware will give an auth token but what if the first user is trying to change the note of a second user. This is why the above if conidtion is mentioned. The problem is if you do not keep these check on the back end side, then any hacker could manupulate our front end and make it look like a correct user is editing a correct document. But if our api is strong then this possiblitiy is gone. 
+
+        note = await Notes.findByIdAndUpdate(req.params.id, {$set: newNote}, {new: true});      //I read the documentation, and explained in brief about this method here, in the .docs file.
+        console.log("Updated note is : "+ note);
+
+        res.status(200).send(note);
+    }
+    catch(error){
+        console.log(error.message);
+        return res.status(400).json({error : error.message});
+    }
 
 }
