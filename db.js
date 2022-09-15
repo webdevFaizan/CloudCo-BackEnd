@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const mongoURI = "mongodb://localhost:27017";
+const mongoURI = "mongodb://localhost:27017/CloudCo";       //Only enter the db name, do not add the collection name in it, mongodb://localhost:27017/CloudCo/user is not valid, since when we hit the mongoose model, for creating data, or querying, etc then this will be automatically connected to the particular collection.
 
 const connetToMongo = () => {
     mongoose.connect(mongoURI, () => {
@@ -8,4 +8,4 @@ const connetToMongo = () => {
 }
 
 
-module.exports = connetToMongo; 
+module.exports = connetToMongo;
