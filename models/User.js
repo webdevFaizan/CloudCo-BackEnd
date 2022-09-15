@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-// const {schema} =mongoose;
 const UserSchema = mongoose.Schema({
     name: {
         type: String,
@@ -21,4 +20,7 @@ const UserSchema = mongoose.Schema({
 },{
     timestamps: true
 });
-module.exports = mongoose.model('user', UserSchema);
+
+const User = mongoose.model('user', UserSchema);
+User.createIndexes();       //Adding this line will require a unique key, which means if same email is entered by 2 users for signup it will reject.
+module.exports = User;
