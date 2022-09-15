@@ -86,12 +86,12 @@ module.exports.login = async (req,res)=>{
 module.exports.getuser = async (req, res)=>{
 
     try {
-        let user_id=req.user;
-        let user = await User.findById(user_id).select("-password");
-        return res.status(200).json(user)
+        let user_id=req.user;       //Once the authentication using id is done (i.e jwt token is verified) then we will extract the payload of the user and then query the db.
+        let user = await User.findById(user_id).select("-password");        //We will query all the items but not take password as it is even sensitive to send or receive the hashed password when it is not required.
+        return res.status(200).json(user);      //Once authenticated then we will send in the details of the user, and the client will take this data and display it as if it is showing the custom data on the very same webpage. This is optimised, since the component of the front end will remain the same, it will be changed as per the api, that too only after login. Once logged in the details will remain the same.
     } catch (error) {
         console.log(error);
-        return res.status(400).json({error : "Intenal Server Error.", message : error.message});
+        return res.status(400).json({error : "Intenal Server Error.", message : error.message});        //In case of any server error, show this data. The react front end can have a '/400' route that will be mounted even if the internet connection is down, this could only be done using single page application, since the components are already downloaded and if the internet connection is down then it will mount this component. This gives a very good user experience, since website is never down. Powerful feature of SPA.
     }
 }
 

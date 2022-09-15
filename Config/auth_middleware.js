@@ -1,3 +1,4 @@
+const e = require('express');
 const { body } = require('express-validator');
 var jwt = require('jsonwebtoken');
 
@@ -30,16 +31,16 @@ module.exports.login = function(req,res,next){
 }
 
 module.exports.getuser = async function(req, res, next){
-    const token = req.header('auth-token');
+    const token = req.header('auth-token');     //Once the user is logged in, then the in the header it will send the jwt token created with the help of jwt_secret key and thus we will extract that information here and then extract the id of the user and then pass on this id to the next middleware to hit the database for our results.
     // console.log(token);
     if(!token){
         return res.status(401).json({error : "Please use a correct authorization token"});
     }
     try {
         const data =jwt.verify(token, JWT_SECRET);
-        req.user = data.user_id;
+        req.user = data.user_id;        //IMPORTANT This is the payload kept inside the jwt token, this is the main identity of the user, we can fetch this data and use it to get the details of the user from the db. In the next function.
         next();
     } catch (error) {
-        return res.status(401).json({error : "erors"});
+        return res.status(401).json({error : error.message});
     }
 }
