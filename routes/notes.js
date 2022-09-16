@@ -15,7 +15,7 @@ router.get('/fetchnotes',authMiddleware.getuser, notesController.getNotes);
 router.post('/addnote',authMiddleware.getuser, notesMiddleware.checkNotes, notesController.addNote);
 
 
-// Route 3 : '/api/notes/updatenote'    using POST, and we need to be logged in for this -
+// Route 3 : '/api/notes/updatenote'    using PUT, and we need to be logged in for this -
 
 // You can use post request in the following funciton, but it is a good idea to use put method for this update request. IMPORTANT** You could use the same end point to do some other works as well, if the request is different, this is one of the main benefits. Plus anyone wathching this code, will automatically know that this request must be for updating. 
 router.put('/updatenote/:id',authMiddleware.getuser, notesController.updateNote);
@@ -23,6 +23,8 @@ router.put('/updatenote/:id',authMiddleware.getuser, notesController.updateNote)
 
 
 
+// Route 3 : '/api/notes/updatenote'    using POST, and we need to be logged in for this -
+router.delete('/deletenote/:id',authMiddleware.getuser, notesController.deleteNote);
 
 
 module.exports = router;

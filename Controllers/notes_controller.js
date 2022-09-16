@@ -78,3 +78,33 @@ module.exports.updateNote = async function (req,res){
     }
 
 }
+
+
+
+
+
+module.exports.deleteNote = async function (req,res){
+    try{
+        // console.log(req.params.id);
+        let note = await Notes.findById(req.params.id);     
+        if(!note){
+            return res.status(404).send("notes not found")
+        }
+        console.log("Old note is : "+ note);
+        
+        if(note.user.toString()!==req.user){        //DOUBT : If the user has been populated, then what will this function note.user.toString() return? Ideally it should return the string id of the user. Or else we could still access the id of the user. notes.user.id just think that the user has been populated then .id will be available inside the object.
+            console.log("You are trying to delete a note you are not authorized to update.");
+            return res.status(401).send("Not authorized to update");
+        }
+
+        note = await Notes.findByIdAndDelete(req.params.id);      //I read the documentation, and explained in brief about this method here, in the .docs file.
+
+        return res.status(200).send("Note is deleted");
+        // note= null;
+    }
+    catch(error){
+        console.log(error.message);
+        return res.status(400).json({error : error.message});
+    }
+
+}
