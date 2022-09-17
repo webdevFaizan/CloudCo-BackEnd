@@ -9,15 +9,16 @@ const JWT_SECRET='iamdev.faizan';       //Ideally this secret should be kept as 
 module.exports.createuser = async (req,res)=>{    //Since we are sending data from the client to server, which is being received by the server, the method should be post not get, since get method will send the req.body data in the url, and post will hide it somehow. This is useful for both sensitive information as well as information that are heavy, for sending in lots of data. Using POST method will not let the password logged using middleware. We do not want password to be saved anywhere.
 
     // This req.body consists of data that we receive from client side, and these data could be appropriate, for example the email could not be in the form of email etc. So we need to use an express validator so that we could keep a check and balance of different parameters.
+    let success = false;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({success, errors: errors.array() });
     }
 
     try{    
         let user = await User.findOne({email : req.body.email});        //Most of the db calls are usually promises, if we do not await then 'user' will have a undefined value.
         if(user){
-            return res.status(400).send({error : "User already exists."})
+            return res.status(400).send({success, error : "User already exists."})
         }
 
         const salt = bcrypt.genSaltSync(saltRounds);
@@ -33,7 +34,7 @@ module.exports.createuser = async (req,res)=>{    //Since we are sending data fr
         }
         var authToken = jwt.sign(data, JWT_SECRET);     //Synchornous sign method, signing the token with data.
         //Here we would want to send the authentication token, this is provided by the server, so that it could be verified that the authentication is properly done.
-        return res.status(200).json({authentication_token : authToken});    //IMPORTANT : This authToken is going to be sent to the client, allowing the client to access and have an authorization to access parts of website, and since the data is kept inside the authToken so the front end could use this token to read what payload is being transferred.
+        return res.status(200).json({success: true, authToken : authToken});    //IMPORTANT : This authToken is going to be sent to the client, allowing the client to access and have an authorization to access parts of website, and since the data is kept inside the authToken so the front end could use this token to read what payload is being transferred.
         // return res.status(200).json({});
     }
     catch(e){
@@ -50,22 +51,26 @@ module.exports.createuser = async (req,res)=>{    //Since we are sending data fr
 //IMORTANT : At this point, ending of lecture 50, we are not using passport js, for any authentication of the user identity, we are using simply bcryptjs to check for the password stored in the data base, now when the authentication is complete, we will pass some unique data of the user in the jwt authentication token. And the best part about this jwt token is that, we will get this token only if the user it authenticated, i.e the user name and password is correct. But the main purpose of jwt token is to provide authorization and which part of website is accessible to me and which part is not, this is not being utilised right now. We will do that in future.
 module.exports.login = async (req,res)=>{ 
     const errors = validationResult(req);
+    console.log(req);
+
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
+
+    let success=false;
 
     let {email, password} = req.body;       //Destructuring and saving the email and password in separate variables.
 
     try{    
         let user = await User.findOne({email : req.body.email});     
         if(!user){
-            return res.status(400).json({error : "Username/Password incorrect."});
+            return res.status(400).json({success,error : "Username/Password incorrect."});
         }
 
         // PARTIALLY IMPORTANT : This method takes a password from the client side, and also takes the hash stored db, to check if the password is correct or not, all the decipeher of the hash will be handled by bcrypt itself. We do not need to worry about the password check.
         const passwordCompare = await bcrypt.compare(password, user.password);
         if(!passwordCompare){
-            return res.status(400).json({error : "Username/Password incorrect."});
+            return res.status(400).json({success : false,error : "Username/Password incorrect."});
         }
 
         console.log(user);
@@ -73,12 +78,12 @@ module.exports.login = async (req,res)=>{
             user_id : user._id
         }
         var authToken = jwt.sign(data, JWT_SECRET);
-        return res.status(200).json({auth_token : authToken});
+        return res.status(200).json({success: true, authToken : authToken});
 
     }
     catch(e){
         console.log(e.message)
-        return res.status(400).json({error : "Intenal Server Error.", message : e.message});
+        return res.status(400).json({success, error : "Intenal Server Error.", message : e.message});
     }
 }
 
